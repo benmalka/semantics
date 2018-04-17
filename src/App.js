@@ -7,8 +7,8 @@ const NOT_SUBGROUP = String.fromCharCode(8836)
 const SUBGROUP = String.fromCharCode(8834)
 const EQ = '='
 const NOT_EQ = String.fromCharCode(8800)
-const UNION = String.fromCharCode(9697)
-const INTERSECTION = String.fromCharCode(9696)
+const UNION = String.fromCharCode(9697) + " - UNION"
+const INTERSECTION = String.fromCharCode(9696) + " - INTERSECTION"
 const MINOS = '-'
 
 
@@ -72,7 +72,7 @@ class Group extends Component{
     return (
       <div className="input_div">
         <a>Name</a>
-        <input onChange={e => this.props.onChangeGroupName(e.target.value)} value={this.props.groupName}/>
+        <input className="Group-input-name" onChange={e => this.props.onChangeGroupName(e.target.value)} value={this.props.groupName}/>
         <a>{a}</a><input onChange={e => this.props.onChangeGroup(this.props.groupId,e.target.value)}/><a>{b}</a>
         <a>{this.state.set_name}</a>
       </div>
@@ -90,11 +90,12 @@ class Info extends Component{
   }
   checkIsIn(){
     const {groupA, groupB} = this.props;
-    if (groupA.length !== groupB.length && !groupA.every((item) => groupB.includes(item))) {
-      this.symbol = NOT_EQ
-    }
-    else if (groupA.length === groupB.length && groupA.every((item) => groupB.includes(item))){
+    if ((groupA.length === groupB.length && groupA.every((item) => groupB.includes(item))) ||  (groupA.length === 1 && groupA[0] === '' && groupB.length === 0) || 
+             (groupB.length === 1 && groupB[0] === '' && groupA.length === 0)){
       this.symbol = EQ
+    }
+    else if (groupA.length !== groupB.length && !groupA.every((item) => groupB.includes(item))) {
+      this.symbol = NOT_EQ
     }
     else if (groupA.every((item) => groupB.includes(item))){
       this.symbol = SUBGROUP
@@ -104,8 +105,9 @@ class Info extends Component{
     }
   }
   getSet(set){
-    const {groupA, groupB} = this.props
-    if (set.length === 0){
+    // const {groupA, groupB} = this.props
+    console.log(set)
+    if (set.length === 0 || (set.length === 1 && set[0] === '')){
       return EMPTY
     }
     // else if (set.length === groupA.length && set.every((val) => groupA.includes(val))){
