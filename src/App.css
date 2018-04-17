@@ -1,0 +1,59 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  animation: App-logo-spin infinite 20s linear;
+  height: 80px;
+}
+
+.App-header {
+  background-color: #222;
+  height: 100px;
+  padding: 20px;
+  color: white;
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  flex-direction: row;
+}
+
+.App-title {
+  font-size: 1.5em;
+  text-align: center;
+}
+
+.App-intro {
+  font-size: large;
+}
+
+.Calc-main{
+  margin: 10px 0;
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  justify-content: center;
+}
+.Calc-params{
+
+}
+.Calc-info{
+  margin: 10px 250px;
+  height: 60px;
+  padding: 15px;
+  text-align: left;
+  background-color: lightcyan;
+}
+.Info-main{
+  display: flex;
+  flex-direction: column;
+}
+
+.Calc-calculator{
+  margin: 10px 0;
+}
+
+@keyframes App-logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
