@@ -53,6 +53,36 @@
 .Calc-calculator{
   margin: 10px 0;
 }
+.Eq-main{
+  display: flex;
+  width: 100%;
+  align-content: center;
+  justify-content: center;
+}
+
+.Eq-textbox{
+  height: 80px;
+  width: 240px;
+  margin: 0 -120px 0 -120px ;
+  resize: none;
+  margin: 0 5px;
+}
+.Keybox-main{
+  display: flex;
+  width: 240px;
+  justify-content: center;
+  align-items: center;
+}
+.Keybox{
+  height: 22px;
+  width: 50px;
+  margin: 2px;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 2px;
+  background-color: rgb(5, 117, 117);
+}
 
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }

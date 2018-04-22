@@ -7,29 +7,32 @@ const NOT_SUBGROUP = String.fromCharCode(8836)
 const SUBGROUP = String.fromCharCode(8834)
 const EQ = '='
 const NOT_EQ = String.fromCharCode(8800)
-const UNION = String.fromCharCode(9697) + " - UNION"
-const INTERSECTION = String.fromCharCode(9696) + " - INTERSECTION"
+const UNION = String.fromCharCode(9697)
+const INTERSECTION = String.fromCharCode(9696)
 const MINOS = '-'
-
+const OPERATOS = [UNION, INTERSECTION, MINOS]
 
 
 class App extends Component {
   constructor(props){
     super(props)
     this.state = {
-      group_a: [],
-      group_name_a: 'A',
-      group_b: [],
-      group_name_b: 'B'
+      groupId: ['A', 'B', 'C'],
+      groups: {'A': [], 'B': [], 'C': []},
     }
-    this.createGroup = this.createGroup.bind(this);
-  }
-  CheckIsIn(group_a, group_b){
-
   }
   createGroup(id, group_str){
+    let data = this.state.groups
+    data[this.state.groupId[id]] = group_str.split(',')
+    this.setState({
+      groups: data
+    })
+  }
+  changeGroupName(id, newName){
     let data = this.state
-    data['group_' + id] = group_str.split(',')
+    data.groups[newName] = data.groups[data.groupId[id]]
+    delete data.groups[data.groupId[id]]
+    data.groupId[id] = newName
     this.setState(data)
   }
   render() {
@@ -40,17 +43,22 @@ class App extends Component {
         </header>
         <div className="Calc-main">
           <div className="Calc-params">
-            <Group groupId='a' groupName={this.state.group_name_a} onChangeGroup={this.createGroup} onChangeGroupName={(name) => this.setState({group_name_a: name})}/>
-            <Group groupId='b' groupName={this.state.group_name_b} onChangeGroup={this.createGroup} onChangeGroupName={(name) => this.setState({group_name_b: name})}/>
+            <Group groupId={0} groupName={this.state.groupId[0]} onChangeGroup={(id, str) => this.createGroup(id, str)} 
+                   onChangeGroupName={(id, name) => this.changeGroupName(id, name)}/>
+            <Group groupId={1} groupName={this.state.groupId[1]} onChangeGroup={(id, str) => this.createGroup(id, str)} 
+                   onChangeGroupName={(id, name) => this.changeGroupName(id, name)}/>
+            <Group groupId={2} groupName={this.state.groupId[2]} onChangeGroup={(id, str) => this.createGroup(id, str)} 
+                   onChangeGroupName={(id, name) => this.changeGroupName(id, name)}/>
           </div>
           <div className='Calc-info'>
-            <Info groupNameA={this.state.group_name_a} groupNameB={this.state.group_name_b} groupA={this.state.group_a} 
-                  groupB={this.state.group_b}/>
+            <Info groupNameA={this.state.groupId[0]} groupNameB={this.state.groupId[1]} groupA={this.state.groups[this.state.groupId[0]]} 
+                  groupB={this.state.groups[this.state.groupId[1]]}/>
           </div>
-          <div className='Calc-calculator'>
+          {/*<div className='Calc-calculator'>
             <Calculator groupNameA={this.state.group_name_a} groupNameB={this.state.group_name_b} groupA={this.state.group_a} 
                         groupB={this.state.group_b}/>
-          </div>
+    </div>*/}
+          <EQWindow groups={this.state.groups}/>
         </div>
         <footer> Powered by BenMalka&trade;</footer>
       </div>
@@ -72,8 +80,8 @@ class Group extends Component{
     return (
       <div className="input_div">
         <a>Name</a>
-        <input className="Group-input-name" onChange={e => this.props.onChangeGroupName(e.target.value)} value={this.props.groupName}/>
-        <a>{a}</a><input onChange={e => this.props.onChangeGroup(this.props.groupId,e.target.value)}/><a>{b}</a>
+        <input className="Group-input-name" onChange={(e) => this.props.onChangeGroupName(this.props.groupId, e.target.value)} value={this.props.groupName}/>
+        <a>{a}</a><input onChange={(e) => this.props.onChangeGroup(this.props.groupId,e.target.value)}/><a>{b}</a>
         <a>{this.state.set_name}</a>
       </div>
       )
@@ -106,7 +114,6 @@ class Info extends Component{
   }
   getSet(set){
     // const {groupA, groupB} = this.props
-    console.log(set)
     if (set.length === 0 || (set.length === 1 && set[0] === '')){
       return EMPTY
     }
@@ -200,5 +207,128 @@ class Calculator extends Component{
       </div>
     )
   }
+}
+class EQWindow extends Component{
+  constructor(props){
+    super(props)
+    this.state = {
+      textbox: '',
+    }
+  }
+  getGroup(group_name){
+    return this.props.groups[group_name]
+  }
+  calculate(group_a, group_b, operator){
+    let tmp;
+    if (!group_a){
+      group_a = []
+    }
+    if (!group_b){
+      group_b = []
+    }
+    switch (operator){
+      case INTERSECTION: {
+        tmp = group_a.filter((val) => group_b.includes(val));
+        break 
+      }
+      case MINOS: {
+        tmp = group_a.filter((val) => !group_b.includes(val));
+        break
+      }
+      case UNION: {
+        tmp = group_a.concat(group_b);
+        let tmp2 = [];
+        tmp.forEach((val) => {
+          if (!tmp2.includes(val)){
+            tmp2.push(val);
+          }
+        })
+        tmp = tmp2
+        break
+      }
+      default:{
+        tmp = group_a
+        break
+      }
+    }
+    return tmp
+  }
+  calucEQ(text){
+    let group_a = null
+    let group_b = null
+    let operator = null
+    for (let i = 0; i < text.length; i++){
+      if (text[i] === '('){
+        let res;
+        if (group_a){
+          res= this.calucEQ(text.slice(i+1))
+          group_b = res[0]
+          i += (res[1]+1)
+        }
+        else{
+          res = this.calucEQ(text.slice(i+1))
+          group_a = res[0]
+          i += (res[1]+1)
+        }
+      }
+      else if (text[i] === ')'){
+        return [this.calculate(group_a, group_b, operator) , i]
+      }
+      else if (OPERATOS.includes(text[i])){
+        operator = text[i]
+      }
+      else{
+        if (group_a){
+          group_b = this.getGroup(text[i])
+        }
+        else{
+          group_a = this.getGroup(text[i])
+        }
+      }
+    }
+    return this.calculate(group_a, group_b, operator)
+  }
+  parseText(text){
+    if (!text || typeof text !== 'object' || text.length === 0){
+      return `= ${EMPTY}`
+    }
+    else{
+      return `= {${text.toString()}}`
+    }
+  }
+  addSymboleToText(text){
+    this.setState({
+      textbox: this.state.textbox + text
+    })
+  }
+  render(){
+    let result = this.parseText(this.calucEQ(this.state.textbox))
+    return (
+      <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column'}}>
+        <div className="Eq-main">
+          <div style={{width: '50%',zIndex: '100', display: 'flex', flexDirection: 'row-reverse', margin: '0 0 0 120px'}}>
+            <textarea className="Eq-textbox" onChange={(e) => this.setState({textbox: e.target.value})} value={this.state.textbox}>{this.state.textbox}</textarea>
+          </div>
+          <div style={{width: '50%', display: 'flex', margin: '0 0 0 -120px'}}>
+            <a style={{display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 0 0 120px'}}>{result}</a>
+          </div>
+        </div>
+        <Keyborad keys={OPERATOS} onKeyStroke={(text) => this.addSymboleToText(text)}/>
+      </div>
+    )
+  }
+}
+class Keyborad extends Component{
+  renderKey(item, index){
+    return (<button key={index} className='Keybox' onClick={() => this.props.onKeyStroke(item)}> {item}</button>)
+  }
+  render(){
+    return(
+      <div className="Keybox-main">
+        {this.props.keys.map((item, index) => this.renderKey(item, index))}
+      </div>
+    )
+  }
+
 }
 export default App;
