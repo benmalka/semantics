@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+import git_logo from './Git-Icon-Black.png';
 import './App.css';
 
 const EMPTY = String.fromCharCode(8709)
@@ -54,12 +54,15 @@ class App extends Component {
             <Info groupNameA={this.state.groupId[0]} groupNameB={this.state.groupId[1]} groupA={this.state.groups[this.state.groupId[0]]} 
                   groupB={this.state.groups[this.state.groupId[1]]}/>
           </div>
-          {/*<div className='Calc-calculator'>
-            <Calculator groupNameA={this.state.group_name_a} groupNameB={this.state.group_name_b} groupA={this.state.group_a} 
-                        groupB={this.state.group_b}/>
-    </div>*/}
           <EQWindow groups={this.state.groups}/>
         </div>
+        <div style={{display: 'flex'}}>
+          <a href='https://github.com/benmalka/semantics' className='Git-a' target="_blank" rel="noopener noreferrer">
+            <div className='Git' >
+              <img src={git_logo} style={{height: 25, width: 25}} alt=''/> Fork me on Github </div>
+          </a>
+        </div>
+        <br/>
         <footer> Powered by BenMalka&trade;</footer>
       </div>
     );

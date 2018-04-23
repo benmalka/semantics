@@ -7,7 +7,6 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 - [How to use](#how-to-use)
 - [Release Notes v0.8.1](#release-notes-v0.8.1)
 - [Features for the future](#features-for-the-future)
-- [npm run eject](#npm-run-eject)
 
 
 ## Info
@@ -27,4 +26,5 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 * Add `U` as a global parameter
 * Add as many sets as you wish
+* Adding a set in the equations (e.g `A-{1,2,3,4}`)
 * Calculate more complex equations (e.g `A-B-(A-U)`)
