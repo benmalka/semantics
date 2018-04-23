@@ -297,8 +297,17 @@ class EQWindow extends Component{
     }
   }
   addSymboleToText(text){
+    let tb = this.refs.Eqtextbox
+    let tmp_text = ''
+    if (tb.selectionStart === tb.selectionEnd){
+      tmp_text = this.state.textbox.substring(0, tb.selectionStart) + text + this.state.textbox.substring(tb.selectionStart)
+    }
+    else (
+      tmp_text = this.state.textbox.substring(0, tb.selectionStart) + text + this.state.textbox.substring(tb.selectionEnd)
+    )
+    tb.focus()
     this.setState({
-      textbox: this.state.textbox + text
+      textbox: tmp_text
     })
   }
   render(){
@@ -306,8 +315,11 @@ class EQWindow extends Component{
     return (
       <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column'}}>
         <div className="Eq-main">
-          <div style={{width: '50%',zIndex: '100', display: 'flex', flexDirection: 'row-reverse', margin: '0 0 0 120px'}}>
-            <textarea className="Eq-textbox" onChange={(e) => this.setState({textbox: e.target.value})} value={this.state.textbox}>{this.state.textbox}</textarea>
+          <div style={{width: '50%',zIndex: '100', display: 'flex', flexDirection: 'row-reverse', margin: '0 0 0 57px'}}>
+            <textarea className="Eq-textbox" 
+                      ref='Eqtextbox' 
+                      onChange={(e) => this.setState({textbox: e.target.value})} 
+                      value={this.state.textbox}>{this.state.textbox}</textarea>
           </div>
           <div style={{width: '50%', display: 'flex', margin: '0 0 0 -120px'}}>
             <a style={{display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 0 0 120px'}}>{result}</a>
