@@ -16,6 +16,7 @@ const OPERATOS = [UNION, INTERSECTION, MINOS]
 class App extends Component {
   constructor(props){
     super(props)
+    this.nextLetter = 'D'
     this.state = {
       groupId: ['A', 'B', 'C'],
       groups: {'A': [], 'B': [], 'C': []},
@@ -28,12 +29,27 @@ class App extends Component {
       groups: data
     })
   }
+  addNewGroup(){
+    let tmp = this.state
+    tmp.groupId.push(this.nextLetter)
+    tmp.groups[this.nextLetter] = []
+    this.nextLetter = String.fromCharCode(this.nextLetter.charCodeAt(0) + 1)
+    this.setState(tmp)
+  }
   changeGroupName(id, newName){
     let data = this.state
+    if (data.groupId.includes(newName) && newName !== '') return;
+    if (!Object.keys(data.groups).includes(data.groupId[id])) data.groups[data.groupId[id]] = [];
     data.groups[newName] = data.groups[data.groupId[id]]
     delete data.groups[data.groupId[id]]
     data.groupId[id] = newName
     this.setState(data)
+  }
+  renderGroup(item, index){
+    return (<Group key={index + '10'} groupId={index} 
+                   groupName={item} 
+                   onChangeGroup={(id, str) => this.createGroup(id, str)} 
+                   onChangeGroupName={(id, name) => this.changeGroupName(id, name)}/>)
   }
   render() {
     return (
@@ -43,16 +59,11 @@ class App extends Component {
         </header>
         <div className="Calc-main">
           <div className="Calc-params">
-            <Group groupId={0} groupName={this.state.groupId[0]} onChangeGroup={(id, str) => this.createGroup(id, str)} 
-                   onChangeGroupName={(id, name) => this.changeGroupName(id, name)}/>
-            <Group groupId={1} groupName={this.state.groupId[1]} onChangeGroup={(id, str) => this.createGroup(id, str)} 
-                   onChangeGroupName={(id, name) => this.changeGroupName(id, name)}/>
-            <Group groupId={2} groupName={this.state.groupId[2]} onChangeGroup={(id, str) => this.createGroup(id, str)} 
-                   onChangeGroupName={(id, name) => this.changeGroupName(id, name)}/>
+            {this.state.groupId.map((item, index) => this.renderGroup(item, index))}
+            <button className='Group-add' onClick={() => this.addNewGroup()}>Add set</button>
           </div>
           <div className='Calc-info'>
-            <Info groupNameA={this.state.groupId[0]} groupNameB={this.state.groupId[1]} groupA={this.state.groups[this.state.groupId[0]]} 
-                  groupB={this.state.groups[this.state.groupId[1]]}/>
+            <Info groups={this.state.groups}/>
           </div>
           <EQWindow groups={this.state.groups}/>
         </div>
@@ -99,118 +110,51 @@ class Info extends Component{
       set_name: null
     }
   }
-  checkIsIn(){
-    const {groupA, groupB} = this.props;
+  checkIsIn(groupA, groupB){
     if ((groupA.length === groupB.length && groupA.every((item) => groupB.includes(item))) ||  (groupA.length === 1 && groupA[0] === '' && groupB.length === 0) || 
              (groupB.length === 1 && groupB[0] === '' && groupA.length === 0)){
-      this.symbol = EQ
+      return EQ
     }
     else if (groupA.length !== groupB.length && !groupA.every((item) => groupB.includes(item))) {
-      this.symbol = NOT_EQ
+      return NOT_EQ
     }
     else if (groupA.every((item) => groupB.includes(item))){
-      this.symbol = SUBGROUP
+      return SUBGROUP
     }
     else{
-      this.symbol = NOT_SUBGROUP
+      return NOT_SUBGROUP
     }
   }
   getSet(set){
-    // const {groupA, groupB} = this.props
     if (set.length === 0 || (set.length === 1 && set[0] === '')){
       return EMPTY
     }
-    // else if (set.length === groupA.length && set.every((val) => groupA.includes(val))){
-    //   return this.props.groupNameA
-    // }
-    // else if (set.length === groupB.length && set.every((val) => groupB.includes(val))){
-    //   return this.props.groupNameB
-    // }
     else{
       return `{${set.toString()}}`
     }
   }
+  renderEqs(item, index){
+    return (<div key={index + '-' + item} >
+            {Object.keys(this.props.groups).map((_item, index) => {
+              if (_item === item) return;
+              return (<a key={index + '/' + item}>{`${item} ${this.checkIsIn(this.props.groups[item], this.props.groups[_item])} ${_item}; `}</a>) 
+            })}
+            </div>)
+  }
+  renderGroupValue(item, index){
+    return (<a key={index}>{`${item} = ${this.getSet(this.props.groups[item])}`}</a>)
+  }
   render(){
-    this.checkIsIn()
-
     return (
         <div className="Info-main">
-          <a>{`${this.props.groupNameA} = ${this.getSet(this.props.groupA)}`}</a>
-          <a>{`${this.props.groupNameB} = ${this.getSet(this.props.groupB)}`}</a>
-          <a>{`${this.props.groupNameA} ${this.symbol} ${this.props.groupNameB}`}</a>
+          {Object.keys(this.props.groups).map((item, index) => this.renderGroupValue(item, index))}
+          <br/>
+          {Object.keys(this.props.groups).map((item, index) => this.renderEqs(item, index))}
         </div>
     )
   }
 }
 
-class Calculator extends Component{
-  constructor(props){
-    super(props)
-    this.operators = [UNION, INTERSECTION, MINOS]
-    this.state = {
-      score: EMPTY
-    }
-  }
-  calcScore(operator){
-    const {groupA, groupB} = this.props
-    let tmp;
-    switch (operator){
-      case INTERSECTION: {
-        tmp = groupA.filter((val) => groupB.includes(val));
-        break 
-      }
-      case MINOS: {
-        tmp = groupA.filter((val) => !groupB.includes(val));
-        break
-      }
-      case UNION: {
-        tmp = groupA.concat(groupB);
-        let tmp2 = [];
-        tmp.forEach((val) => {
-          if (!tmp2.includes(val)){
-            tmp2.push(val);
-          }
-        })
-        tmp = tmp2
-        break
-      }
-      default:{
-        break
-      }
-    }
-    if (tmp.length === 0){
-      tmp = EMPTY
-    }
-    else if (tmp.every((val) => groupA.includes(val)) && tmp.length === groupA.length){
-      tmp = this.props.groupNameA
-    }
-    else if (tmp.every((val) => groupB.includes(val)) && tmp.length === groupB.length){
-      tmp = this.props.groupNameB
-    }
-    this.setState({
-      score: tmp
-    })
-  }
-  rednerOption(val, index){
-    return(<option key={index} value={val}>{val}</option>)
-  }
-  componentDidMount(){
-    this.calcScore(UNION)
-  }
-  render(){
-    const a = typeof this.state.score === 'object' ? `= {${this.state.score.toString()}}` : `= ${this.state.score.toString()}`
-    return (
-      <div>
-        <a>{this.props.groupNameA} </a>
-        <select onChange={(e) => this.calcScore(e.target.value)}>
-          {this.operators.map((val, index) => this.rednerOption(val, index))}
-        </select>
-        <a> {this.props.groupNameB} </a>
-        <a>{a}</a>
-      </div>
-    )
-  }
-}
 class EQWindow extends Component{
   constructor(props){
     super(props)
@@ -333,6 +277,7 @@ class EQWindow extends Component{
     )
   }
 }
+
 class Keyborad extends Component{
   renderKey(item, index){
     return (<button key={index} className='Keybox' onClick={() => this.props.onKeyStroke(item)}> {item}</button>)
@@ -346,4 +291,5 @@ class Keyborad extends Component{
   }
 
 }
+
 export default App;
